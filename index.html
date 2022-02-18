@@ -1,0 +1,178 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>clk</title>
+  <style>
+    body {
+      background-color: #000; width: 100%; height: 100%; margin: 0; /*overflow: hidden;*/
+    }
+    .pat-table {
+      border: 1px solid white; color: white; font-size: 2vh; font-family: 'Comic Sans MS';
+      position: absolute; top: 85%; width: 100%; text-align: center;
+    }
+    textarea {
+      background-color: black;
+      border: 1px solid white; color: white; font-size: 2vh; font-family: 'Consolas';
+      position: absolute; top: 5%; left: 5%;
+    }
+  </style>
+  <!-- <script src="https://tonejs.github.io/build/Tone.min.js"></script> -->
+  <script src="src/vendor/Tone.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.36.0/lib/codemirror.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.36.0/lib/codemirror.css" />
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.36.0/mode/javascript/javascript.js"></script>
+  <style>
+    .CodeMirror {
+      background-color: rgba(255,255,255,0.1);
+      color: #DDD;
+      font-size: 2em;
+	  height: 83.5%;
+    }
+    .CodeMirror-cursor {
+      border-left: 1px solid white;
+    }
+  </style>
+  <script src="src/itera.js"></script>
+  <script src="src/main.js"></script>
+</head>
+<body>
+
+  <textarea rows="20" cols="80">
+var p = (t) => {
+  if(t % 4 === 0) return 12 - (t % 12);
+  else return abs(sin(t/10))*7;
+}
+var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)), [0.9,0.2,0.4,0.6]) * 12;
+
+p0.pat(p).clk(50).tone(am);
+p1.pat(pp).clk(200).tone(bleep);
+</textarea>
+
+  <table class="pat-table"> <!-- TODO - update these as the patt progresses in time -->
+    <tr>
+      <td>
+        <p>p0</p>
+      </td>
+      <td>
+        [pattern0]
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>p1</p>
+      </td>
+      <td>
+        [pattern1]
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>p2</p>
+      </td>
+      <td>
+        [pattern2]
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <p>p3</p>
+      </td>
+      <td>
+        [pattern3]
+      </td>
+    </tr>
+  </table>
+
+<script>
+
+// make 'hotkeys.js' to handle any key combo -> hotkeys.update(key) in both down/up listeners // hotkeys['ctrlenter'] ? hotkeys.add('Control', 'Enter') ?
+
+  var textarea = document.getElementsByTagName('textarea')[0], ctrlenter = [false, false];
+
+  var editor = CodeMirror.fromTextArea(textarea);
+
+  document.getElementsByClassName('CodeMirror')[0].addEventListener('keydown', function (e) {
+    if(e.key === 'Control' && !ctrlenter[0]) ctrlenter[0] = true;
+    else if(e.key === 'Enter' && !ctrlenter[1]) ctrlenter[1] = true;
+    if(ctrlenter[0] && ctrlenter[1]) eval(editor.getValue());  // eval
+  });
+
+  document.getElementsByClassName('CodeMirror')[0].addEventListener('keyup', function (e) {
+    if(e.key === 'Control') ctrlenter[0] = false;
+    else if(e.key === 'Enter') ctrlenter[1] = false;
+  });
+
+  start();
+  startMidi();
+
+  // var mp = pat([0,1,2,0,0,1,3,12].map(x => 50 + (x * 2)))
+  // var p1 = pat(x => Math.abs(Math.sin(x))*12).clk(8).tone(synth);
+  var p = (t) => {
+    if(t % 4 === 0) return 12 - (t % 12);
+    else return abs(sin(t/10))*7;
+  }
+  var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)), [0.9,0.2,0.4,0.6]) * 12;
+
+  // p0.pat(p).clk(150).tone(am);
+  // p1.pat(pp).clk(200).tone(bleep);
+
+  // p0.pat(p).clk(50).tone(am);
+  // p1.pat(pp).clk(200).tone(bleep);
+
+  console.log(p1);
+
+  /* the initial problem with function chaining method:
+
+  you can no longer make a common pattern eg:
+  var patt = pat([0,1,2,5]).clk(16)
+
+  patt.vary(x => 'sutin').midi('Saffire-6USB')
+  patt.vary(x => x % 10 === 0, {every:4}).tone(synth)
+
+  therefore, can contain some kind of node tree
+  that branches off when you split the chain to another destination
+  somehow, it keeps track of where this branch occurred
+  if you call cut() or sever() at any point in the branch of chain,
+  it removes that chain from the branching node
+
+  to help visualise, there's a box in the bottom right
+  that contains a pictorial representation of this node tree (left to right)
+  that updates as your cursor moves from line to line,
+  highlighting the branch that the current line is on, if chain is split.
+  
+  or just 
+  
+  p0.pat([0,1,2]).clk(4).tone(bleep)
+  p1.pat(p0).clk(20).tone(am)
+
+  //////////////
+
+  there's also trouble with the method of routing patterns to multiple destinations
+  maybe at the end of the chain, use a dest() method, that takes an object
+  each ky of the object is a destination name, and the value is the specifics eg:
+  .dest({
+    "midi": "Saffire 6USB",
+    "tone": amSynth,
+  })
+
+  but then how to control multiple aspects of the same Tone.synth ? v easy in FD ...
+
+  */
+  
+  /*
+  
+var p = (t) => {
+  if(t % 12 < 4) return 0 - (t % 12);
+  else return abs(sin(t/10))*7 - 12;
+}
+var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)) + Math.random() * .2, [0.9,0.2,0.4,0.6]) * 12 - 12;
+
+p0.pat(p).clk(5).tone(am);
+p1.pat(pp).clk(40).tone(bleep);
+
+  
+  */
+
+</script>
+</body>
