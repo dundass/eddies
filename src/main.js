@@ -73,10 +73,10 @@ var clk = clk || {};
   
   var tonePlayers = {
 	  bleep: new Tone.Synth(),
-      mono: new Tone.MonoSynth(),
+      mono: new Tone.MonoSynth({volume: -23, filter: {frequency: 1000}}),
 	  duo: new Tone.DuoSynth({vibratoAmount: 0.3, vibratoRate: 2}),
       am: new Tone.AMSynth(),
-	  fm: new Tone.FMSynth(),
+	  fm: new Tone.FMSynth({volume: -10}),
 	  metal: new Tone.MetalSynth(),
 	  noise: new Tone.NoiseSynth({noise: {type: 'pink'}}),
 	  pluck: new Tone.PluckSynth({resonance: 0.85, dampening: 6000}),
@@ -176,10 +176,13 @@ var clk = clk || {};
 		get: function (t) {
 		  t = t / this.rate;
 		  var val = parsePattern(this.data, t);
-		  for(var i = 0; i < this.transforms.length; i++) 
-			  if(this.transforms[i].opts.condition(t))
-				val = parsePattern(this.transforms[i].transform, t);	// does this mean that it'll always overwrite the prev pattern val ? any way to pass the new value thru ??
-		  return val;	// maybe if transform is a number or array, then it goes to that absolutely, but a func applies itself to the prev val ???? but how to distinguish between function(t){} and function(prevVal){} ?
+		  for(var i = 0; i < this.transforms.length; i++) {
+			  if(this.transforms[i].opts.condition(t)) {
+				  val = parsePattern(this.transforms[i].transform, t); // does this mean that it'll always overwrite the prev pattern val ? any way to pass the new value thru ??
+				  // maybe if transform is a number or array, then it goes to that absolutely, but a func applies itself to the prev val ???? but how to distinguish between function(t){} and function(prevVal){} ? maybe pat generators take time, and transforms take prevVal (=val in this get func)
+			  }
+		  }
+		  return val;	
 		},
 		pat: function (data) {	// to do chords, send in multiple data args to pattern, each corresponding to ...
 		  this.data = data || 0;

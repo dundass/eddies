@@ -1,3 +1,13 @@
+  # pattern table feature
+  
+  a table view at the bottom of the screen that updates as each active pattern progresses in time
+  
+  helps to view the evolution of the music for performer and audience
+  
+  auto scaling for the axes as the minima/maxima change
+  
+  see commit #231fa61 for an example table in index.html
+
   # sending objects as synth param args
   
   ok, so
@@ -95,3 +105,41 @@
   as u scroll or add new lines, they stay in line w each other, the graphic and the corresponding code
   
   also have the current unimplemented 'moving window' graph representation of recent (+future?) values on either side of the left, mid or right
+  
+  # initial problem with the pattern chaining method
+  
+  you can no longer make a common pattern eg:
+  ```
+  var patt = pat([0,1,2,5]).clk(16)
+
+  patt.vary(x => 'sutin').midi('Saffire-6USB')
+  patt.vary(x => x % 10 === 0, {every:4}).tone(synth)
+  ```
+  therefore, can contain some kind of node tree
+  that branches off when you split the chain to another destination
+  somehow, it keeps track of where this branch occurred
+  if you call cut() or sever() at any point in the branch of chain,
+  it removes that chain from the branching node
+
+  to help visualise, there's a box in the bottom right
+  that contains a pictorial representation of this node tree (left to right)
+  that updates as your cursor moves from line to line,
+  highlighting the branch that the current line is on, if chain is split.
+  
+  or just do:
+  ```
+  p0.pat([0,1,2]).clk(4).tone(bleep)
+  p1.pat(p0).clk(20).tone(am)
+  ```
+  
+  there's also trouble with the method of routing patterns to multiple destinations
+  maybe at the end of the chain, use a dest() method, that takes an object
+  each ky of the object is a destination name, and the value is the specifics eg:
+  .dest({
+    "midi": "Saffire 6USB",
+    "tone": amSynth,
+  })
+
+  but then how to control multiple aspects of the same Tone.synth ? v easy in FD ...
+  
+  

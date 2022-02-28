@@ -39,50 +39,30 @@
 <body>
 
   <textarea rows="20" cols="80">
-var p = (t) => {
-  if(t % 4 === 0) return 12 - (t % 12);
-  else return abs(sin(t/10))*7;
+// p0, p1, p2 etc are the pattern refs
+// you create a pattern using pat()
+// advance the pattern in time using clk()
+// then output to eg Tonejs using tone(bleep)
+
+p0.pat([0,-2,0,3]).clk(200).tone(mono)
+
+// you can supply functions to pat()
+
+var func = (t) => {
+  return 12 + sin(t/10) * 12
 }
-var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)), [0.9,0.2,0.4,0.6]) * 12;
+p1.pat(func).clk(100).tone(fm)
 
-p0.pat(p).clk(50).tone(am);
-p1.pat(pp).clk(200).tone(bleep);
+// and create variation using often(), sometimes() and rarely()
+
+p2.pat([3,0,2]).clk(50).sometimes([7,0]).rarely(12).tone(am)
+
+// Tonejs players available: bleep, mono, duo, am, fm, metal, noise, pluck, brane
+// A sampler can be found at: smp (a drum sample player loaded with kick, snare, hat, openhat in indices 0-3)
+
+// .stop() to stop an individual player, hush() at end of file to stop all sound
+
 </textarea>
-
-  <table class="pat-table"> <!-- TODO - update these as the patt progresses in time -->
-    <tr>
-      <td>
-        <p>p0</p>
-      </td>
-      <td>
-        [pattern0]
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>p1</p>
-      </td>
-      <td>
-        [pattern1]
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>p2</p>
-      </td>
-      <td>
-        [pattern2]
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>p3</p>
-      </td>
-      <td>
-        [pattern3]
-      </td>
-    </tr>
-  </table>
 
 <script>
 
@@ -121,44 +101,6 @@ p1.pat(pp).clk(200).tone(bleep);
   // p1.pat(pp).clk(200).tone(bleep);
 
   console.log(p1);
-
-  /* the initial problem with function chaining method:
-
-  you can no longer make a common pattern eg:
-  var patt = pat([0,1,2,5]).clk(16)
-
-  patt.vary(x => 'sutin').midi('Saffire-6USB')
-  patt.vary(x => x % 10 === 0, {every:4}).tone(synth)
-
-  therefore, can contain some kind of node tree
-  that branches off when you split the chain to another destination
-  somehow, it keeps track of where this branch occurred
-  if you call cut() or sever() at any point in the branch of chain,
-  it removes that chain from the branching node
-
-  to help visualise, there's a box in the bottom right
-  that contains a pictorial representation of this node tree (left to right)
-  that updates as your cursor moves from line to line,
-  highlighting the branch that the current line is on, if chain is split.
-  
-  or just 
-  
-  p0.pat([0,1,2]).clk(4).tone(bleep)
-  p1.pat(p0).clk(20).tone(am)
-
-  //////////////
-
-  there's also trouble with the method of routing patterns to multiple destinations
-  maybe at the end of the chain, use a dest() method, that takes an object
-  each ky of the object is a destination name, and the value is the specifics eg:
-  .dest({
-    "midi": "Saffire 6USB",
-    "tone": amSynth,
-  })
-
-  but then how to control multiple aspects of the same Tone.synth ? v easy in FD ...
-
-  */
   
   /*
   
@@ -171,6 +113,16 @@ var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)) + Math.random()
 p0.pat(p).clk(5).tone(am);
 p1.pat(pp).clk(40).tone(bleep);
 
+//////////////////////
+
+var p = (t) => {
+  if(t % 4 === 0) return 12 - (t % 12);
+  else return abs(sin(t/10))*7;
+}
+var pp = (t) => -1 + itera.perlinfunction(t, x => abs(sin(x/20)), [0.9,0.2,0.4,0.6]) * 12;
+
+p0.pat(p).clk(50).tone(am);
+p1.pat(pp).clk(200).tone(bleep);
   
   */
 
